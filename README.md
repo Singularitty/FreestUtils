@@ -3,15 +3,15 @@
 Was a bit bored and decided to try to program in FreeST https://freest-lang.github.io/
 
 Implemented some usefull functionality in utils.fst:
-- Matrixes
+- Matrices
 - More List functionalities
 - Interesting Printing Funcitonalities
 
-# Matrixes
+# Matrices
 
-Matrixes are defined as an 1d list with x*y elements, with x being the width of the matrix.
+Matrices are defined as an 1d list with x*y elements, with x being the width of the matrix.
 
-Matrixes can be created using:
+Matrices can be created using:
 
 ```Haskell
 -- Zero filled matrix
