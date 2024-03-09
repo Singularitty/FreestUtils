@@ -2,12 +2,20 @@ module ListUtils where
 
 import List
 
-type Matrix = ([Int], Int)
-type Coordinates = (Int, Int)
+-------------------------------------------------------------------
+--                      Extra Utils
+-------------------------------------------------------------------
 
 -- Prints the string representation of a value without including a \n char at the end
 smPrint : forall a:*T . a -> ()
 smPrint x = putStr $ show @a x
+
+printCharArray : [Int] -> ()
+printCharArray [] = putStrLn "\0"
+printCharArray (x::xs) =
+    let c = chr x in
+    putChar c;
+    printCharArray xs
 
 -- Converts Int between 0-9 to Char
 intToChar : Int -> Char
@@ -37,6 +45,66 @@ __createList n v arr
 createList : Int -> Int -> [Int]
 createList n v = __createList n v []
 
+-------------------------------------------------------------------
+--                      Polymorphic Lists
+-------------------------------------------------------------------
+
+
+type Value = forall a:*T . a
+data PolyList = Nil | List Value PolyList
+
+
+pHead : PolyList -> Value
+pHead Nil = error @Value "*** ListUtils.pHead: empty list"
+pHead (List v _) = v
+
+pTail : PolyList -> PolyList
+pTail Nil = error @PolyList "*** ListUtils.pTail: empty list"
+pTail (List _ x) = x
+
+pLast : PolyList -> Value
+pLast Nil = error @Value "*** ListUtils.pLast: empty list"
+pLast (List v Nil) = v
+pLast (List _ x) = pLast x
+
+pNull : PolyList -> Bool
+pNull Nil = True
+pNull x   = False
+
+pSingleton : Value -> PolyList
+pSingleton v = List v Nil
+
+pLength : PolyList -> Int
+pLength Nil = 0
+pLength (List _ x) = 1 + pLength x
+
+pElemAt : PolyList -> Int -> Value
+pElemAt Nil n
+    | n < 0     = error @Value "*** ListUtils.pElemAt: negative index"
+    | otherwise = error @Value "*** ListUtils.pElemAt: index too large"
+pElemAt (List v xs) n
+    | n == 0    = v
+    | otherwise = pElemAt xs (n-1)
+
+pConcat : PolyList -> PolyList -> PolyList
+pConcat Nil Nil = error @PolyList "*** ListUtils.pConcat: Can't concatenate two empty lists"
+pConcat Nil y   = y
+pConcat x   Nil = x
+pConcat (List v x) y = pConcat x (List v y)
+
+pSplitAt : PolyList -> Int -> (PolyList, PolyList)
+pSplitAt Nil _ = (Nil, Nil)
+pSplitAt (List x xs) n
+    | n <= 0 = (Nil, (List x xs))
+    | otherwise = let (ys, zs) = pSplitAt xs (n-1) in ((List x xs), zs)
+
+-------------------------------------------------------------------
+--                      Matrices
+-------------------------------------------------------------------
+
+type Matrix = ([Int], Int)
+type Coordinates = (Int, Int)
+
 -- Reads element at position x,y from a given matrix
 mRead : Matrix -> Coordinates -> Int
 mRead matrix coords =
@@ -63,7 +131,7 @@ mInitFill x y v =
 
 
 __splitAndPrint : [Int] -> Int -> ()
-__splitAndPrint [] _ = print @String "\0"
+__splitAndPrint [] _ = putStrLn "\0"
 __splitAndPrint arr n  =
     let (x,xs) = splitAt n arr in
     print @[Int] x ; 
@@ -75,18 +143,11 @@ mPrint m =
     let (array, width) = m in
     __splitAndPrint array width
 
-__printCharArray : [Int] -> ()
-__printCharArray [] = print @String "\0"
-__printCharArray (x::xs) =
-    let c = chr x in
-    smPrint @Char c;
-    __printCharArray xs
-
 __splitAndPrintChar : [Int] -> Int -> ()
-__splitAndPrintChar [] _ = print @String "\0"
+__splitAndPrintChar [] _ = putStrLn "\0"
 __splitAndPrintChar arr n =
     let (x,xs) = splitAt n arr in
-    __printCharArray x;
+    printCharArray x;
     __splitAndPrintChar xs n
 
 -- Converts the Ints in the buffers to chars and prints them
@@ -94,7 +155,3 @@ bufferPrint : Matrix -> ()
 bufferPrint m =
     let (array, width) = m in
     __splitAndPrintChar array width
-
-
---main : String
---main = bufferPrint (mInitFill 54 40 36) ; "\0"
