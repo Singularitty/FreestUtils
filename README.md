@@ -4,7 +4,7 @@ Was a bit bored and decided to try to program in FreeST https://freest-lang.gith
 
 Implemented some usefull functionality in utils.fst:
 - Matrices
-- More List functionalities
+- String, Char and Float Lists, alongside some extra functionality
 - Interesting Printing Funcitonalities
 
 # Matrices
