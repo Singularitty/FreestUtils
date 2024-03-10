@@ -1,1 +1,1 @@
-*.rb linguist-language=Haskell
+*.fst linguist-language=Haskell
