@@ -46,57 +46,183 @@ createList : Int -> Int -> [Int]
 createList n v = __createList n v []
 
 -------------------------------------------------------------------
---                      Polymorphic Lists
+--                           Lists
 -------------------------------------------------------------------
 
+-- String Lists
 
-type Value = forall a:*T . a
-data PolyList = Nil | List Value PolyList
+data StringList = SNil | SList String StringList
 
+sHead : StringList -> String
+sHead SNil = error @String "*** ListUtils.pHead: empty list"
+sHead (SList v _) = v
 
-pHead : PolyList -> Value
-pHead Nil = error @Value "*** ListUtils.pHead: empty list"
-pHead (List v _) = v
+sTail : StringList -> StringList
+sTail SNil = error @StringList "*** ListUtils.pTail: empty list"
+sTail (SList _ x) = x
 
-pTail : PolyList -> PolyList
-pTail Nil = error @PolyList "*** ListUtils.pTail: empty list"
-pTail (List _ x) = x
+sLast : StringList -> String
+sLast SNil = error @String "*** ListUtils.pLast: empty list"
+sLast (SList v SNil) = v
+sLast (SList _ x) = sLast x
 
-pLast : PolyList -> Value
-pLast Nil = error @Value "*** ListUtils.pLast: empty list"
-pLast (List v Nil) = v
-pLast (List _ x) = pLast x
+sNull : StringList -> Bool
+sNull SNil = True
+sNull x   = False
 
-pNull : PolyList -> Bool
-pNull Nil = True
-pNull x   = False
+sSingleton : String -> StringList
+sSingleton v = SList v SNil
 
-pSingleton : Value -> PolyList
-pSingleton v = List v Nil
+sLength : StringList -> Int
+sLength SNil = 0
+sLength (SList _ x) = 1 + sLength x
 
-pLength : PolyList -> Int
-pLength Nil = 0
-pLength (List _ x) = 1 + pLength x
-
-pElemAt : PolyList -> Int -> Value
-pElemAt Nil n
-    | n < 0     = error @Value "*** ListUtils.pElemAt: negative index"
-    | otherwise = error @Value "*** ListUtils.pElemAt: index too large"
-pElemAt (List v xs) n
+sElemAt : StringList -> Int -> String
+sElemAt SNil n
+    | n < 0     = error @String "*** ListUtils.pElemAt: negative index"
+    | otherwise = error @String "*** ListUtils.pElemAt: index too large"
+sElemAt (SList v xs) n
     | n == 0    = v
-    | otherwise = pElemAt xs (n-1)
+    | otherwise = sElemAt xs (n-1)
 
-pConcat : PolyList -> PolyList -> PolyList
-pConcat Nil Nil = error @PolyList "*** ListUtils.pConcat: Can't concatenate two empty lists"
-pConcat Nil y   = y
-pConcat x   Nil = x
-pConcat (List v x) y = pConcat x (List v y)
+sConcat : StringList -> StringList -> StringList
+sConcat SNil SNil = error @StringList "*** ListUtils.pConcat: Can't concatenate two empty lists"
+sConcat SNil y   = y
+sConcat x   SNil = x
+sConcat (SList v x) y = sConcat x (SList v y)
 
-pSplitAt : PolyList -> Int -> (PolyList, PolyList)
-pSplitAt Nil _ = (Nil, Nil)
-pSplitAt (List x xs) n
-    | n <= 0 = (Nil, (List x xs))
-    | otherwise = let (ys, zs) = pSplitAt xs (n-1) in ((List x xs), zs)
+sSplitAt : StringList -> Int -> (StringList, StringList)
+sSplitAt SNil _ = (SNil, SNil)
+sSplitAt (SList x xs) n
+    | n <= 0 = (SNil, (SList x xs))
+    | otherwise = let (ys, zs) = sSplitAt xs (n-1) in ((SList x xs), zs)
+
+__StringRepresentation : StringList -> Int -> ()
+__StringRepresentation SNil _ = putStr "\0"
+__StringRepresentation (SList s SNil) _ = putStr ", " ; putStr s ; putStrLn "]"
+__StringRepresentation (SList s x) i
+    | i == 0 = putStr "[" ; putStr s ; __StringRepresentation x (i+1)
+    | otherwise = putStr ", " ; putStr s ;  __StringRepresentation x (i+1)
+
+sPrint : StringList -> ()
+sPrint SNil = putStr "[]\0"
+sPrint x = __StringRepresentation x 0
+
+-- Float Lists
+
+data FloatList = FNil | FList Float FloatList
+
+fHead : FloatList -> Float
+fHead FNil = error @Float "*** ListUtils.fHead: empty list"
+fHead (FList v _) = v
+
+fTail : FloatList -> FloatList
+fTail FNil = error @FloatList "*** ListUtils.fTail: empty list"
+fTail (FList _ x) = x
+
+fLast : FloatList -> Float
+fLast FNil = error @Float "*** ListUtils.fLast: empty list"
+fLast (FList v FNil) = v
+fLast (FList _ x) = fLast x
+
+fNull : FloatList -> Bool
+fNull FNil = True
+fNull _   = False
+
+fSingleton : Float -> FloatList
+fSingleton v = FList v FNil
+
+fLength : FloatList -> Int
+fLength FNil = 0
+fLength (FList _ x) = 1 + fLength x
+
+fElemAt : FloatList -> Int -> Float
+fElemAt FNil n
+    | n < 0     = error @Float "*** ListUtils.fElemAt: negative index"
+    | otherwise = error @Float "*** ListUtils.fElemAt: index too large"
+fElemAt (FList v xs) n
+    | n == 0    = v
+    | otherwise = fElemAt xs (n-1)
+
+fConcat : FloatList -> FloatList -> FloatList
+fConcat FNil y = y
+fConcat x FNil = x
+fConcat (FList v x) y = fConcat x (FList v y)
+
+fSplitAt : FloatList -> Int -> (FloatList, FloatList)
+fSplitAt FNil _ = (FNil, FNil)
+fSplitAt (FList x xs) n
+    | n <= 0 = (FNil, FList x xs)
+    | otherwise = let (ys, zs) = fSplitAt xs (n-1) in (FList x ys, zs)
+
+__FloatListRepresentation : FloatList -> Int -> ()
+__FloatListRepresentation FNil _ = putStr "\0"
+__FloatListRepresentation (FList s FNil) _ = putStr ", " ; smPrint @Float s ; putStrLn "]"
+__FloatListRepresentation (FList s x) i
+    | i == 0 = putStr "[" ; smPrint @Float s ; __FloatListRepresentation x (i+1)
+    | otherwise = putStr ", " ; smPrint @Float s ;  __FloatListRepresentation x (i+1)
+
+fPrint : FloatList -> ()
+fPrint FNil = putStr "[]\0"
+fPrint x = __FloatListRepresentation x 0
+
+-- Char List
+
+data CharList = CNil | CList Char CharList
+
+cHead : CharList -> Char
+cHead CNil = error @Char "*** ListUtils.cHead: empty list"
+cHead (CList v _) = v
+
+cTail : CharList -> CharList
+cTail CNil = error @CharList "*** ListUtils.cTail: empty list"
+cTail (CList _ x) = x
+
+cLast : CharList -> Char
+cLast CNil = error @Char "*** ListUtils.cLast: empty list"
+cLast (CList v CNil) = v
+cLast (CList _ x) = cLast x
+
+cNull : CharList -> Bool
+cNull CNil = True
+cNull _   = False
+
+cSingleton : Char -> CharList
+cSingleton v = CList v CNil
+
+cLength : CharList -> Int
+cLength CNil = 0
+cLength (CList _ x) = 1 + cLength x
+
+cElemAt : CharList -> Int -> Char
+cElemAt CNil n
+    | n < 0     = error @Char "*** ListUtils.cElemAt: negative index"
+    | otherwise = error @Char "*** ListUtils.cElemAt: index too large"
+cElemAt (CList v xs) n
+    | n == 0    = v
+    | otherwise = cElemAt xs (n-1)
+
+cConcat : CharList -> CharList -> CharList
+cConcat CNil y = y
+cConcat x CNil = x
+cConcat (CList v x) y = cConcat x (CList v y)
+
+cSplitAt : CharList -> Int -> (CharList, CharList)
+cSplitAt CNil _ = (CNil, CNil)
+cSplitAt (CList x xs) n
+    | n <= 0 = (CNil, CList x xs)
+    | otherwise = let (ys, zs) = cSplitAt xs (n-1) in (CList x ys, zs)
+
+__CharListReepresentation : CharList -> Int -> ()
+__CharListReepresentation CNil _ = putStr "\0"
+__CharListReepresentation (CList s CNil) _ = putStr ", " ; putChar s ; putStrLn "]"
+__CharListReepresentation (CList s x) i
+    | i == 0 = putStr "[" ; putChar s ; __CharListReepresentation x (i+1)
+    | otherwise = putStr ", " ; putChar s ;  __CharListReepresentation x (i+1)
+
+cPrint : CharList -> ()
+cPrint CNil = putStr "[]\0"
+cPrint x = __CharListReepresentation x 0
 
 -------------------------------------------------------------------
 --                      Matrices
@@ -155,3 +281,5 @@ bufferPrint : Matrix -> ()
 bufferPrint m =
     let (array, width) = m in
     __splitAndPrintChar array width
+
+
