@@ -71,6 +71,4 @@ Output:
 
 # Donut
 
-Tried to implement a spinning donut using the algorithm in https://www.a1k0n.net/2011/07/20/donut-math.html, but the code runs to slow. 
-
-The lack of functionality involving floats made it challenging to implement it.
+Tried to implement a spinning donut using the algorithm in https://www.a1k0n.net/2011/07/20/donut-math.html, but the code runs to slow due to the way matrices are implemented.
