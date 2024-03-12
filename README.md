@@ -3,7 +3,7 @@
 Was a bit bored and decided to try to program in FreeST https://freest-lang.github.io/
 
 Implemented some usefull functionality in utils.fst:
-- Matrices
+- Matrices (String and Float matrices also, do not recommend using large matrices for these)
 - String, Char and Float Lists, alongside some extra functionality
 - Interesting Printing Funcitonalities
 
