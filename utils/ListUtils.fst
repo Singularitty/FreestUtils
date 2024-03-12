@@ -97,6 +97,25 @@ sSplitAt (SList x xs) n
     | n <= 0 = (SNil, (SList x xs))
     | otherwise = let (ys, zs) = sSplitAt xs (n-1) in ((SList x xs), zs)
 
+sWriteAt : StringList -> Int -> String -> StringList
+sWriteAt SNil _ _ = SNil
+sWriteAt (SList x xs) n v
+    | n < 0     = error @StringList "*** ListUtils.pWriteAt: negative index"
+    | n > sLength (SList x xs) = error @StringList "*** ListUtils.pWriteAt: index too large"
+    | n == 0 = SList v xs
+    | otherwise = SList x (sWriteAt xs (n-1) v)
+
+__sCreateList : Int -> String -> StringList -> StringList 
+__sCreateList n v SNil
+    | n <= 0        = error @StringList "*** sCreateList: Size less or equal to 0"
+    | otherwise     = __sCreateList (n-1) v (sSingleton v)
+__sCreateList n v (SList x xs)
+    | n == 0        = (SList x xs)
+    | otherwise     = SList v (__sCreateList (n-1) v (SList x xs))
+
+sCreateList : Int -> String -> StringList
+sCreateList n v = __sCreateList n v SNil
+
 __StringRepresentation : StringList -> Int -> ()
 __StringRepresentation SNil _ = putStr "\0"
 __StringRepresentation (SList s SNil) _ = putStr ", " ; putStr s ; putStrLn "]"
@@ -107,6 +126,11 @@ __StringRepresentation (SList s x) i
 sPrint : StringList -> ()
 sPrint SNil = putStr "[]\0"
 sPrint x = __StringRepresentation x 0
+
+concatenatePrint : StringList -> ()
+concatenatePrint SNil = putStr "\0"
+concatenatePrint (SList s SNil) = putStr s
+concatenatePrint (SList s x) = putStr s ; concatenatePrint x
 
 -- Float Lists
 
@@ -154,6 +178,25 @@ fSplitAt FNil _ = (FNil, FNil)
 fSplitAt (FList x xs) n
     | n <= 0 = (FNil, FList x xs)
     | otherwise = let (ys, zs) = fSplitAt xs (n-1) in (FList x ys, zs)
+
+fWriteAt : FloatList -> Int -> Float -> FloatList
+fWriteAt FNil _ _ = FNil
+fWriteAt (FList x xs) n v
+    | n < 0     = error @FloatList "*** ListUtils.fWriteAt: negative index"
+    | n > fLength (FList x xs) = error @FloatList "*** ListUtils.fWriteAt: index too large"
+    | n == 0 = FList v xs
+    | otherwise = FList x (fWriteAt xs (n-1) v)
+
+__fCreateList : Int -> Float -> FloatList -> FloatList
+__fCreateList n v FNil
+    | n <= 0        = error @FloatList "*** fCreateList: Size less or equal to 0"
+    | otherwise     = __fCreateList (n-1) v (fSingleton v)
+__fCreateList n v (FList x xs)
+    | n == 0        = (FList x xs)
+    | otherwise     = FList v (__fCreateList (n-1) v (FList x xs))
+
+fCreateList : Int -> Float -> FloatList
+fCreateList n v = __fCreateList n v FNil
 
 __FloatListRepresentation : FloatList -> Int -> ()
 __FloatListRepresentation FNil _ = putStr "\0"
@@ -228,6 +271,8 @@ cPrint x = __CharListReepresentation x 0
 --                      Matrices
 -------------------------------------------------------------------
 
+-- Integers Matrices
+
 type Matrix = ([Int], Int)
 type Coordinates = (Int, Int)
 
@@ -283,3 +328,64 @@ bufferPrint m =
     __splitAndPrintChar array width
 
 
+-- Float Matrices
+
+type FloatMatrix = (FloatList, Int)
+
+mfRead : FloatMatrix -> Coordinates -> Float
+mfRead matrix coords =
+    let (array, width) = matrix in
+    let (collum, row) = coords in 
+    fElemAt array (width * row + collum)
+
+mfWrite : FloatMatrix -> Coordinates -> Float -> FloatMatrix
+mfWrite matrix coords value =
+    let (array, width) = matrix in
+    let (collum, row) = coords in
+    let index = width * row + collum in 
+    (fWriteAt array index value, width)
+
+mfInit : Int -> Int -> FloatMatrix
+mfInit x y =
+    (fCreateList (x*y) 0.0, x)
+
+mfInitFill: Int -> Int -> Float -> FloatMatrix
+mfInitFill x y v =
+    (fCreateList (x*y) v, x)
+
+-- String Matrices
+
+type StringMatrix = (StringList, Int)
+
+msRead : StringMatrix -> Coordinates -> String
+msRead matrix coords =
+    let (array, width) = matrix in
+    let (collum, row) = coords in 
+    sElemAt array (width * row + collum)
+
+msWrite : StringMatrix -> Coordinates -> String -> StringMatrix
+msWrite matrix coords value =
+    let (array, width) = matrix in
+    let (collum, row) = coords in
+    let index = width * row + collum in 
+    (sWriteAt array index value, width)
+
+msInit : Int -> Int -> StringMatrix
+msInit x y =
+    (sCreateList (x*y) "", x)
+
+msInitFill: Int -> Int -> String -> StringMatrix
+msInitFill x y v =
+    (sCreateList (x*y) v, x)
+
+__splitAndPrintString : StringList -> Int -> ()
+__splitAndPrintString SNil _ = putStrLn "\0"
+__splitAndPrintString arr n  =
+    let (x,xs) = sSplitAt arr n in
+    concatenatePrint x ; 
+    __splitAndPrintString xs n
+
+sMatrixPrint : StringMatrix -> ()
+sMatrixPrint m = 
+    let (array, width) = m in __splitAndPrintString array width
+    
