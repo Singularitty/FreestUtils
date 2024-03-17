@@ -45,6 +45,13 @@ __createList n v arr
 createList : Int -> Int -> [Int]
 createList n v = __createList n v []
 
+-- Compares two chars
+charEq : Char -> Char -> Bool
+charEq c1 c2 =
+    let i1 = ord c1 in
+    let i2 = ord c2 in
+    i1 == i2
+
 -------------------------------------------------------------------
 --                           Lists
 -------------------------------------------------------------------
@@ -95,7 +102,7 @@ sSplitAt : StringList -> Int -> (StringList, StringList)
 sSplitAt SNil _ = (SNil, SNil)
 sSplitAt (SList x xs) n
     | n <= 0 = (SNil, (SList x xs))
-    | otherwise = let (ys, zs) = sSplitAt xs (n-1) in ((SList x xs), zs)
+    | otherwise = let (ys, zs) = sSplitAt xs (n-1) in ((SList x ys), zs)
 
 sWriteAt : StringList -> Int -> String -> StringList
 sWriteAt SNil _ _ = SNil
@@ -128,8 +135,8 @@ sPrint SNil = putStr "[]\0"
 sPrint x = __StringRepresentation x 0
 
 concatenatePrint : StringList -> ()
-concatenatePrint SNil = putStr "\0"
-concatenatePrint (SList s SNil) = putStr s
+concatenatePrint SNil = putStrLn "\0"
+concatenatePrint (SList s SNil) = putStrLn s
 concatenatePrint (SList s x) = putStr s ; concatenatePrint x
 
 -- Float Lists
@@ -381,8 +388,8 @@ msInitFill x y v =
 __splitAndPrintString : StringList -> Int -> ()
 __splitAndPrintString SNil _ = putStrLn "\0"
 __splitAndPrintString arr n  =
-    let (x,xs) = sSplitAt arr n in
-    concatenatePrint x ; 
+    let (x, xs) = sSplitAt arr n in
+    concatenatePrint x ;
     __splitAndPrintString xs n
 
 sMatrixPrint : StringMatrix -> ()
