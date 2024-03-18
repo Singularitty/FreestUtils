@@ -79,7 +79,7 @@ __determineDirection c
     | otherwise = print @Char c ; error @Int "*** snake.__deterineDirection: Invalid input direction"
 
 getDirection : Int
-getDirection = putStrLn "Next move? (w - up, s - down, d - right, a - right)" ; __determineDirection (readChar getLine)
+getDirection = putStrLn "Next move? (w - up, s - down, d - right, a - left)" ; __determineDirection (readChar getLine)
 
 getUserSeed : Int
 getUserSeed = 
