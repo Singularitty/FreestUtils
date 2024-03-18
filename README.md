@@ -42,7 +42,7 @@ main = prngGen seed
 
 This uses the Linear Congruential generator algorithm
 
-$X_{n+1} = (aX_n + c)\;\; mod\;\; m$
+$X_{n+1} = (aX_n + c) mod m$
 
 With the following parameters:
 
